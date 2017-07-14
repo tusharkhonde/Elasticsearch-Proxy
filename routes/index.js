@@ -1,8 +1,8 @@
-var express = require('express');
-var router = express.Router();
-var records = require('../helper/betterdoctor.js');
-var elastic = require('../helper/elasticsearch.js');
-var async = require('async');
+const express = require('express'),
+      router = express.Router(),
+      records = require('../helper/betterdoctor.js'),
+      elastic = require('../helper/elasticsearch.js')
+      async = require('async');
 
 router.get('/', function(req,res){
     res.json('BetterDoctor Proxy App');
@@ -37,31 +37,14 @@ router.get('/api/v1/doctors/search', function(req, res) {
                 */
                 records(name,function (result) {
                     if(result.data.length > 1) {
-
-                        async.series([
-                            function (cb) {
-                                if (!elastic.indexExists()) {
-                                    elastic.createIndex();
-                                }
-                                cb();
-                            },
-                            /**
-                             * Add Doctor response to elasticsearch
-                             */
-                            function (cb) {
-                                result.data.map(function (data) {
-                                    elastic.addRecords(data);
-                                });
-                                cb(null,result.data);
-                            }
-                        ], function (err, results) {
-                            cb(null,results[1]);
-                        });
-
+                        /**
+                        * Add Doctor response to elasticsearch
+                        */
+                        elastic.bulkIndex('doctor', 'document', result.data);
+                        cb(null,result.data);
                     }else{
                         cb(null,"No results found for given name");
                     }
-
                 });
             }
         ],function (err, results) {
@@ -77,6 +60,5 @@ router.get('/api/v1/doctors/search', function(req, res) {
     }
 
 });
-
 
 module.exports = router;

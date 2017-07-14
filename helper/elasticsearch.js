@@ -1,4 +1,4 @@
-var elastic = require('elasticsearch');
+const elastic = require('elasticsearch');
 
 const esClient = new elastic.Client({
     host: "localhost:9200",
@@ -18,11 +18,11 @@ esClient.ping({
 /**
  * Adding records to Elasticsearch
  */ 
-const addRecords = function (record) {
+const addRecords = (record) => {
 
     esClient.index({
         index:"doctor",
-        type:"record",
+        type:"document",
         body: record
     });
 };
@@ -39,20 +39,28 @@ const createIndex = function() {
 /**
  * Checking if index exists in Elasticsearch
  */
-const indexExists = function() {
+const indexExists = () => {
     return esClient.indices.exists({
         index: "doctor"
     });
 };
+
+indexExists().then((exists) => {
+    if(!exists)
+        return true;
+}).then((status)=>{
+    if(status)
+        return createIndex();
+});
 
 /**
  * 
  * @param {*} name to search 
  * @param {*} cb callback
  */
-const searchIndex = function (name,cb) {
+const searchIndex = (name,cb) => {
 
-    let names = name.split(' ');
+    const names = name.split(' ');
     let query = "";
     if(names.length == 1)
         query = names[0];
@@ -74,9 +82,45 @@ const searchIndex = function (name,cb) {
     });
 };
 
+/**
+ * Indexing data from BetterDoctor API respsone
+ * @param {*} index 
+ * @param {*} type 
+ * @param {*} data 
+ */
+const bulkIndex = (index, type, data) => {
+  const bulkBody = [];
+
+  data.forEach((item) => {
+    bulkBody.push({
+      index: {
+        _index: index,
+        _type: type,
+        _id: item.id,
+      },
+    });
+
+    bulkBody.push(item);
+  });
+
+  esClient.bulk({ body: bulkBody })
+    .then((response) => {
+      let errorCount = 0;
+      response.items.forEach((item) => {
+        if (item.index && item.index.error) {
+          console.log(errorCount += 1, item.index.error);
+        }
+      });
+      console.log(`Successfully indexed ${data.length - errorCount} out of ${data.length} items`);
+    })
+    .catch(console.err);
+};
+
+
 module.exports = {
     addRecords: addRecords,
     createIndex: createIndex,
     indexExists: indexExists,
-    searchIndex: searchIndex
+    searchIndex: searchIndex,
+    bulkIndex: bulkIndex
 };
