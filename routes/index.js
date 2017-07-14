@@ -36,11 +36,11 @@ router.get('/api/v1/doctors/search', function(req, res) {
                  * Get records from BetterDoctor API
                 */
                 records(name,function (result) {
-                    if(result.data.length > 1) {
+                    if(result.data.length >= 1) {
                         /**
                         * Add Doctor response to elasticsearch
                         */
-                        elastic.bulkIndex('doctor', 'document', result.data);
+                        elastic.bulkIndex("doctor", "document", result.data);
                         cb(null,result.data);
                     }else{
                         cb(null,"No results found for given name");
@@ -52,10 +52,10 @@ router.get('/api/v1/doctors/search', function(req, res) {
                 const data = results[0].map(function (item) {
                                 return item._source;
                             });
-                res.json(data); // response from elasticsearch
+                res.json(data); // Response from elasticsearch
             }
             else
-                res.json(results[1]); // response from BetterDoctor API
+                res.json(results[1]); // Response from BetterDoctor API
         });
     }
 

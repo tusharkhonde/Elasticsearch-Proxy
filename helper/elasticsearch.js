@@ -4,6 +4,7 @@ const esClient = new elastic.Client({
     host: "localhost:9200",
     requestTimeout: "60000"
 });
+const indexName = "doctor";
 
 esClient.ping({
   requestTimeout: "60000"
@@ -21,7 +22,7 @@ esClient.ping({
 const addRecords = (record) => {
 
     esClient.index({
-        index:"doctor",
+        index:indexName,
         type:"document",
         body: record
     });
@@ -32,7 +33,7 @@ const addRecords = (record) => {
  */ 
 const createIndex = function() {
     return esClient.indices.create({
-        index: "doctor"
+        index: indexName
     });
 };
 
@@ -41,7 +42,7 @@ const createIndex = function() {
  */
 const indexExists = () => {
     return esClient.indices.exists({
-        index: "doctor"
+        index: indexName
     });
 };
 
@@ -55,8 +56,8 @@ indexExists().then((exists) => {
 
 /**
  * 
- * @param {*} name to search 
- * @param {*} cb callback
+ * @param {*} name
+ * @param {*} cb
  */
 const searchIndex = (name,cb) => {
 
@@ -68,7 +69,7 @@ const searchIndex = (name,cb) => {
         query = names[0] + " AND " + names[1];
     
     esClient.search({
-                "index" : "doctor",
+                "index" : indexName,
                 "body": {
                     "query": {
                         "query_string": {
