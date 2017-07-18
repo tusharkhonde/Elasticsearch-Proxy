@@ -1,0 +1,8 @@
+{   
+    "BetterDoctor": {
+        "UserKey": "enter better-doctor user_key"
+    },
+    "Elasticsearch": {
+        "URL":"localhost:9200"
+    }
+}

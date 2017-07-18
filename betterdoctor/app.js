@@ -1,5 +1,7 @@
 const request = require('request'),
-      key = require('./secrets.js');
+      config = require('config');
+
+const key = config.get('BetterDoctor.UserKey')
 
 const getRecords =  (name,cb) => {
 

@@ -1,32 +1,6 @@
-const elastic = require('elasticsearch');
+const esClient = require('./connect.js');
 
-const esClient = new elastic.Client({
-    host: "localhost:9200",
-    requestTimeout: "60000"
-});
 const indexName = "doctor";
-
-esClient.ping({
-  requestTimeout: "60000"
-}, function (error) {
-  if (error) {
-    console.trace('Elasticsearch cluster is down!');
-  } else {
-    console.log('Elasticsearch Connected');
-  }
-});
-
-/**
- * Adding records to Elasticsearch
- */ 
-const addRecords = (record) => {
-
-    esClient.index({
-        index:indexName,
-        type:"document",
-        body: record
-    });
-};
 
 /**
  * Creating index in Elasticsearch
@@ -119,9 +93,8 @@ const bulkIndex = (index, type, data) => {
 
 
 module.exports = {
-    addRecords: addRecords,
-    createIndex: createIndex,
-    indexExists: indexExists,
-    searchIndex: searchIndex,
-    bulkIndex: bulkIndex
+    createIndex,
+    indexExists,
+    searchIndex,
+    bulkIndex
 };
